@@ -1,5 +1,6 @@
 import os
-os.system('install_packages.bat')
+# Need to install first time manually
+# os.system('install_packages.bat')
 import pyodbc as odbc
 import snowflake.connector
 import pandas as pd
