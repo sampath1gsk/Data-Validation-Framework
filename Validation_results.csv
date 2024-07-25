@@ -1,0 +1,10 @@
+source_table,target_table,Validation_type,Validation_Result,Reason,execution_time
+Product,ProductChanges,Data Validation,Fail,"In Target ""Quantity"" columns populated as nulls",2024-07-16 14:34:53
+Product,ProductChanges,Data Validation,Fail,"The data mismatch count column wise ""Quantity"" = 4",2024-07-16 14:34:53
+Product,ProductChanges,Data Validation,Fail,"Mismatched Data: Source_""Quantity""= 10, Target_""Quantity""= none for key columns  ""Productid"" = 101 ",2024-07-16 14:34:53
+Product,ProductChanges,Data Validation,Fail,"Mismatched Data: Source_""Quantity""= 15, Target_""Quantity""= none for key columns  ""Productid"" = 102 ",2024-07-16 14:34:53
+Product,ProductChanges,Data Validation,Fail,"Mismatched Data: Source_""Quantity""= 25, Target_""Quantity""= none for key columns  ""Productid"" = 104 ",2024-07-16 14:34:53
+Product,ProductChanges,Data Validation,Fail,"Mismatched Data: Source_""Quantity""= 30, Target_""Quantity""= none for key columns  ""Productid"" = 105 ",2024-07-16 14:34:53
+Product,ProductChanges,Count validation,Pass,"Source_Count= 4 , Target_Count = 4",2024-07-16 14:34:53
+Product,ProductChanges,Datatype Validation,Pass,,2024-07-16 14:34:53
+Product,ProductChanges,Duplicate Validation,Pass,,2024-07-16 14:34:53
