@@ -197,4 +197,4 @@ root.state('zoomed')
 
 root.mainloop()
 
-print(global_result)
+# print(global_result)
