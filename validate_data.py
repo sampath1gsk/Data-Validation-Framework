@@ -7,6 +7,8 @@ def data_validation( source_df,source_columns, target_df,target_columns,src_key,
     src_cleaned = source_df
     tgt_cleaned = target_df
 
+
+
     empty_rows_in_source = len(source_df) - len(source_df.dropna(how='all'))
     empty_rows_in_target = len(target_df) - len(target_df.dropna(how='all'))
 

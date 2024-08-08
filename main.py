@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import warnings
 from input_server_details import global_result
