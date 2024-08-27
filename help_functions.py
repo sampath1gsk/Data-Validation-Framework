@@ -108,8 +108,9 @@ def write_output(connection, server_type, database, schema, table_name, source_t
     camel_case_columns = lambda col: ''.join([word.capitalize() for word in col.split('_')])
     source_table_name=camel_case_columns(source_table_name)
     target_table_name=camel_case_columns(target_table_name)
-
-    dtv = 'Pass' if Datatype_validation_status[0] == '' else 'Fail'
+    if Datatype_validation_status:
+        dtv = 'Pass' if Datatype_validation_status[0] == '' else 'Fail'
+   
     dv = 'Pass' if Data_Validation_status[0] == '' else 'Fail'
     dup = 'Pass' if Duplicate_Validation_status[0] == '' else 'Fail'
 
@@ -216,6 +217,9 @@ def normalize_boolean_column(col):
 def process_and_split_columns(source_connection, source_db, source_schema, source_table_name, source_column_names,
                               target_connection, target_db, target_schema, target_table_name, target_column_names):
     
+    # print(source_column_names)
+    # print(target_column_names)
+    
     if isinstance(source_column_names, float) and not isinstance(target_column_names, float):
         source_column_names = target_column_names
     elif not isinstance(source_column_names, float) and isinstance(target_column_names, float):
@@ -224,6 +228,8 @@ def process_and_split_columns(source_connection, source_db, source_schema, sourc
         pass
 
     if not (isinstance(source_column_names, float) and isinstance(target_column_names, float)):
+
+
         source_column_names = [i.strip() for i in source_column_names.split(',')]
         target_column_names = [i.strip() for i in target_column_names.split(',')]
 

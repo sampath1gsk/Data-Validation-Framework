@@ -12,14 +12,12 @@ from validate_duplicates import *
 warnings.simplefilter("ignore", UserWarning)
 warnings.simplefilter("ignore", FutureWarning)
 
-
 efile = r"Data_validation_input.xlsx"
 
 #all the input details entered through UI stored in below format
 
 # global_result={
-# 'source_type': 'SQLSERVER', 'target_type': 'SQLSERVER', 'output_type': 'SQLSERVER',
-# 'source_server_name': 'PTDELL0032\\SQLEXPRESS', 'source_username': '', 'source_password': '',
+# 'source_type': 'File', 'target_type': 'SQLSERVER', 'output_type': 'SQLSERVER',
 # 'target_server_name': 'PTDELL0032\\SQLEXPRESS', 'target_username': '', 'target_password': '', 
 # 'output_server_name': 'PTDELL0032\\SQLEXPRESS', 'output_username': '', 'output_password': '', 
 # 'output_database': 'sam', 'output_schema': 'dbo',
@@ -222,127 +220,144 @@ for row in input3_info:
                         target_table_name = input('Enter target table name.').upper()
 
 
-        # elif (not isinstance(source_file_path, float)) and isinstance(target_file_path, float):
-        #     print("Doing operation for: ", source_file, ' and ', target_table_name)
+        elif (not isinstance(source_file_path, float)) and isinstance(target_file_path, float):
 
-        #     is_tgt_table_valid = validate_tables(target_connection, target_db, target_schema, target_table_name)
-        #     if is_tgt_table_valid:
+            print("Doing operation for: ", source_file, ' and ', target_table_name)
 
-        #         src_df, src_df_columns = handle_file(source_file, "Source")
-        #         if src_df is None:
-        #             break
-        #         if isinstance(source_columns, float) and isinstance(target_columns, float):
-        #             source_columns = ','.join(src_df_columns).upper()
+            is_tgt_table_valid = validate_tables(target_connection, target_db, target_schema, target_table_name)
 
-        #         source_columns, target_columns = process_and_split_columns(None, None, None, None, source_columns,
-        #                                                                    target_connection, target_db, target_schema,
-        #                                                                    target_table_name, target_columns)
+            if is_tgt_table_valid:
+                
+                source_df, source_df_columns = handle_file(source_file, "Source")
+                
+                if source_df is None:
+                    break
 
-        #         if (validate_columns(None, None, None, None, source_columns, src_df_columns) and validate_columns(
-        #                 target_connection, target_db, target_schema, target_table_name, target_columns, None)):
+                if isinstance(source_columns, float) and isinstance(target_columns, float):
+                    source_columns = ','.join(source_df_columns).upper()
+                
 
-        #             tgt_df = get_table_data(target_connection, target_db, target_schema, target_table_name,
-        #                                     target_columns)
-        #             source_table_name = source_file
-        #             mismatch_source_column = ''
-        #             mismatch_source_length_column = ''
+                source_columns, target_columns = process_and_split_columns(None, None, None, None, source_columns,
+                                                                           target_connection, target_db, target_schema,
+                                                                           target_table_name, target_columns)
+                
+                if (validate_columns(None, None, None, None, source_columns, source_columns) and validate_columns(
+                        target_connection, target_db, target_schema, target_table_name, target_columns, None)):
 
-        #             count_validation, datatype_validation = count_and_dt_validation(
-        #                 mismatch_source_column, src_df, tgt_df)
-        #             src_distinct, tgt_distinct, df_cleaned1, df_cleaned2 = cleaned_data(src_df, tgt_df)
+                    target_df = get_table_data(target_connection, target_db, target_schema, target_table_name,
+                                            target_columns)
+                    
+                    source_table_name = source_file
 
-        #             src_key = make_key(df_cleaned1, source_columns)
-        #             src_key = src_key.split(',')
-        #             tgt_key = []
+                    count_validation_status=count_validation(source_df,target_df)
 
-        #             for i in src_key:
-        #                 j = source_columns.index(i)
-        #                 tgt_key.append(target_columns[j])
-        #             tgt_key = ','.join(tgt_key)
-        #             src_key = ','.join(src_key)
+                    datatype_validation_status=[]
+                    
+                    source_processed,target_processed = process_data(source_df,target_df)
+                    
+                    src_key = make_key(source_processed, source_columns)
 
-        #             print('Source Primary Key Identified  :  ',src_key)
-        #             print('\nTarget Primary Key Identified  :  ',tgt_key)
+                    src_key = src_key.split(',')
+                    tgt_key = []
 
-        #             data_validation, duplicate_validation = validation(src_df, df_cleaned1, source_columns,
-        #                                                                src_key, tgt_df, df_cleaned2, target_columns,
-        #                                                                tgt_key, error_records)
-        #             write_output(output_connection, output_type, output_database, output_schema,
-        #                          output_table_name, source_table_name, target_table_name, count_validation,
-        #                          datatype_validation, data_validation,
-        #                          duplicate_validation, mismatch_source_length_column)
-        #             break
-        #         else:
-        #             if not prompt_user_for_reentry('Columns are incorrect.'):
-        #                 break
-        #             else:
-        #                 source_columns, target_columns = re_enter_Columns()
-        #     else:
-        #         if not prompt_user_for_reentry('Provided tgt table details are incorrect.'):
-        #             break
-        #         else:
-        #             target_db = input('Enter target database.').upper()
-        #             target_schema = input('Enter target schema.').upper()
-        #             target_table_name = input('Enter target table name.').upper()
+                    for i in src_key:
+                        j = source_columns.index(i)
+                        tgt_key.append(target_columns[j])
+                    tgt_key = ','.join(tgt_key)
+                    src_key = ','.join(src_key)
 
-        # elif isinstance(source_file_path, float) and (not isinstance(target_file_path, float)):
-        #     print("Doing operation for: ", source_table_name, ' and ', target_file)
+                    print('Source Primary Key Identified  :  ',src_key)
+                    print('\nTarget Primary Key Identified  :  ',tgt_key)
 
-        #     if validate_tables(source_connection, source_db, source_schema, source_table_name):
-        #         tgt_df, tgt_df_columns = handle_file(target_file, "Target")
-        #         if tgt_df is None:
-        #             break
+                    duplicate_validation_status=duplicate_validation(source_df,target_df,src_key,tgt_key)
 
-        #         if isinstance(source_columns, float) and isinstance(target_columns, float):
-        #             target_columns = ','.join(tgt_df_columns).upper()
+                    data_validation_status = data_validation(source_processed,source_columns,
+                                                                    target_processed, target_columns,
+                                                                    src_key,tgt_key, max_error_records)
+                    
+                    write_output(output_connection, output_type, output_database, output_schema,
+                                 output_table_name,
+                                 source_table_name, target_table_name, count_validation_status, datatype_validation_status,
+                                 data_validation_status, duplicate_validation_status)
+                    break
+                else:
+                    if not prompt_user_for_reentry('Columns are incorrect.'):
+                        break
+                    else:
+                        source_columns, target_columns = re_enter_Columns()
+            else:
+                if not prompt_user_for_reentry('Provided tgt table details are incorrect.'):
+                    break
+                else:
+                    target_db = input('Enter target database.').upper()
+                    target_schema = input('Enter target schema.').upper()
+                    target_table_name = input('Enter target table name.').upper()
 
-        #         source_columns, target_columns = (process_and_split_columns(
-        #             source_connection, source_db, source_schema, source_table_name, source_columns,
-        #             None, None, None, None, target_columns))
+        elif isinstance(source_file_path, float) and (not isinstance(target_file_path, float)):
+            print("Doing operation for: ", source_table_name, ' and ', target_file)
+            
+            is_src_table_valid=validate_tables(source_connection, source_db, source_schema, source_table_name)
+            
+            if is_src_table_valid :
+                
+                target_df, target_df_columns = handle_file(target_file, "Target")
+                
+                if target_df is None:
+                    break
 
-        #         if (validate_columns(source_connection, source_db, source_schema, source_table_name, source_columns,
-        #                              None) and validate_columns(None, None, None, None,
-        #                                                         source_columns, tgt_df_columns)):
+                if isinstance(source_columns, float) and isinstance(target_columns, float):
+                    target_columns = ','.join(target_df_columns).upper()
 
-        #             src_df = get_table_data(source_connection, source_db, source_schema,
-        #                                     source_table_name, source_columns)
+                source_columns, target_columns = (process_and_split_columns(
+                    source_connection, source_db, source_schema, source_table_name, source_columns,
+                    None, None, None, None, target_columns))
 
-        #             mismatch_source_column = ''
-        #             mismatch_source_length_column = ''
-        #             target_table_name = target_file
+                if (validate_columns(source_connection, source_db, source_schema, source_table_name, source_columns,
+                                     None) and validate_columns(None, None, None, None,
+                                                                source_columns, target_df_columns)):
 
-        #             count_validation, datatype_validation = count_and_dt_validation(mismatch_source_column,
-        #                                                                             src_df, tgt_df)
-        #             src_distinct, tgt_distinct, df_cleaned1, df_cleaned2 = cleaned_data(src_df, tgt_df)
+                    source_df = get_table_data(source_connection, source_db, source_schema,
+                                            source_table_name, source_columns)
+
+                    target_table_name = target_file
+
+                    count_validation_status = count_validation(source_df,target_df) 
+                
+                    datatype_validation_status=[]
+                    
+                    source_processed,target_processed = process_data(source_df,target_df)
        
-        #             src_key, tgt_key = get_key(source_type, source_connection, source_db, source_table_name,
-        #                                        source_schema, source_columns, target_columns, df_cleaned1)
+                    src_key,tgt_key= get_key(source_type, source_connection, source_db, source_table_name,
+                                               source_schema, source_columns, target_columns, source_processed)
 
-        #             print('Source Primary Key Identified  :  ',src_key)
-        #             print('\nTarget Primary Key Identified  :  ',tgt_key)
+                    print('Source Primary Key Identified  :  ',src_key)
+                    print('\nTarget Primary Key Identified  :  ',tgt_key)
 
-        #             data_validation, duplicate_validation = validation(
-        #                 src_df, df_cleaned1, source_columns, src_key, tgt_df,
-        #                 df_cleaned2, target_columns, tgt_key, error_records)
-                 
-        #             write_output(output_connection, output_type, output_database, output_schema,
-        #                          output_table_name, source_table_name, target_table_name, count_validation,
-        #                          datatype_validation, data_validation,
-        #                          duplicate_validation, mismatch_source_length_column)
-        #             break
-        #         else:
-        #             if not prompt_user_for_reentry('Columns are incorrect.'):
-        #                 break
-        #             else:
-        #                 source_columns, target_columns = re_enter_Columns()
+                    duplicate_validation_status=duplicate_validation(source_df,target_df,src_key,tgt_key)
 
-        #     else:
-        #         if not prompt_user_for_reentry('Provided src table details are incorrect.'):
-        #             break
-        #         else:
-        #             source_db = input('Enter src database.').upper()
-        #             source_schema = input('Enter src schema.').upper()
-        #             source_table_name = input('Enter src table name.').upper()
+                    data_validation_status = data_validation(source_processed,source_columns,
+                                                                    target_processed, target_columns,
+                                                                    src_key,tgt_key, max_error_records)
+                    
+                    write_output(output_connection, output_type, output_database, output_schema,
+                                 output_table_name,
+                                 source_table_name, target_table_name, count_validation_status, datatype_validation_status,
+                                 data_validation_status, duplicate_validation_status)
+                    
+                    break
+                else:
+                    if not prompt_user_for_reentry('Columns are incorrect.'):
+                        break
+                    else:
+                        source_columns, target_columns = re_enter_Columns()
+
+            else:
+                if not prompt_user_for_reentry('Provided src table details are incorrect.'):
+                    break
+                else:
+                    source_db = input('Enter src database.').upper()
+                    source_schema = input('Enter src schema.').upper()
+                    source_table_name = input('Enter src table name.').upper()
 
         # else:
         #     print("Doing operation for: ", source_file, ' and ', target_file)
