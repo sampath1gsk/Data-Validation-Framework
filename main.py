@@ -359,65 +359,72 @@ for row in input3_info:
                     source_schema = input('Enter src schema.').upper()
                     source_table_name = input('Enter src table name.').upper()
 
-        # else:
-        #     print("Doing operation for: ", source_file, ' and ', target_file)
-        #     print()
-        #     src_df, src_df_columns = handle_file(source_file, "Source")
-        #     if src_df is None:
-        #         break
-        #     tgt_df, tgt_df_columns = handle_file(target_file, "Target")
-        #     if tgt_df is None:
-        #         break
+        else:
+            
+            print("Doing operation for: ", source_file, ' and ', target_file)
+            print()
 
-        #     if isinstance(source_columns, float) and isinstance(target_columns, float):
-        #         source_columns = ','.join(sorted(src_df_columns)).upper()
-        #         target_columns = ','.join(sorted(tgt_df_columns)).upper()
-        #         if source_columns != target_columns:
-        #             source_columns = ''
-        #             target_columns = ''
+            source_df, source_df_columns = handle_file(source_file, "Source")
+            if source_df is None:
+                break
 
-        #     source_columns, target_columns = process_and_split_columns(None, None, None, None, source_columns,
-        #                                                                None, None, None, None, target_columns)
+            target_df, target_df_columns = handle_file(target_file, "Target")
+            if target_df is None:
+                break
 
-        #     if (source_columns != '' and target_columns != '') and (
-        #             validate_columns(None, None, None, None, source_columns, src_df_columns)
-        #             and validate_columns(None, None, None, None, target_columns, tgt_df_columns)):
+            if isinstance(source_columns, float) and isinstance(target_columns, float):
+                source_columns = ','.join(sorted(source_df_columns)).upper()
+                target_columns = ','.join(sorted(target_df_columns)).upper()
+                if source_columns != target_columns:
+                    source_columns = ''
+                    target_columns = ''
 
-        #         mismatch_source_column = ''
-        #         mismatch_source_length_column = ''
-        #         source_table_name = source_file
-        #         target_table_name = target_file
+            source_columns, target_columns = process_and_split_columns(None, None, None, None, source_columns,
+                                                                       None, None, None, None, target_columns)
 
-        #         count_validation, datatype_validation = (
-        #             count_and_dt_validation(mismatch_source_column, src_df, tgt_df))
+            if (source_columns != '' and target_columns != '') and (
+                    validate_columns(None, None, None, None, source_columns, source_df_columns)
+                    and validate_columns(None, None, None, None, target_columns, target_df_columns)):
+
+                source_table_name = source_file
+                target_table_name = target_file
+
+                count_validation_status = count_validation(source_df,target_df) 
                 
-        #         src_distinct, tgt_distinct, df_cleaned1, df_cleaned2 = cleaned_data(src_df, tgt_df)
-        #         src_key = make_key(df_cleaned1, source_columns)
-        #         tgt_key = []
-        #         src_key = src_key.split(',')
-        #         for i in src_key:
-        #             j = source_columns.index(i)
-        #             tgt_key.append(target_columns[j])
-        #         tgt_key = ','.join(tgt_key)
-        #         src_key = ','.join(src_key)
+                datatype_validation_status=[]
+                    
+                source_processed,target_processed = process_data(source_df,target_df)
+
+                src_key = make_key(source_processed, source_columns)
+
+                src_key = src_key.split(',')
+                tgt_key = []
+
+                for i in src_key:
+                    j = source_columns.index(i)
+                    tgt_key.append(target_columns[j])
+                tgt_key = ','.join(tgt_key)
+                src_key = ','.join(src_key)
+
+                print('Source Primary Key Identified  :  ',src_key)
+                print('\nTarget Primary Key Identified  :  ',tgt_key)
+
+                duplicate_validation_status=duplicate_validation(source_df,target_df,src_key,tgt_key)
+
+                data_validation_status = data_validation(source_processed,source_columns,
+                                                                target_processed, target_columns,
+                                                                src_key,tgt_key, max_error_records)
                 
-        #         print('Source Primary Key Identified  :  ',src_key)
-        #         print('\nTarget Primary Key Identified  :  ',tgt_key)
+                write_output(output_connection, output_type, output_database, output_schema,
+                                output_table_name,
+                                source_table_name, target_table_name, count_validation_status, datatype_validation_status,
+                                data_validation_status, duplicate_validation_status)
 
-        #         data_validation, duplicate_validation = (
-        #             validation(src_df, df_cleaned1, source_columns, src_key, tgt_df, df_cleaned2,
-        #                        target_columns, tgt_key, error_records))
-                
-        #         write_output(output_connection, output_type, output_database, output_schema,
-        #                      output_table_name, source_table_name, target_table_name, count_validation,
-        #                      datatype_validation, data_validation,
-        #                      duplicate_validation, mismatch_source_length_column)
+                break
 
-        #         break
+            else:
 
-        #     else:
-
-        #         if not prompt_user_for_reentry('Columns are incorrect.'):
-        #             break
-        #         else:
-        #             source_columns, target_columns = re_enter_Columns()
+                if not prompt_user_for_reentry('Columns are incorrect.'):
+                    break
+                else:
+                    source_columns, target_columns = re_enter_Columns()
