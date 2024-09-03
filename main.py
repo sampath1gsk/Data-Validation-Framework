@@ -12,122 +12,48 @@ from validate_duplicates import *
 warnings.simplefilter("ignore", UserWarning)
 warnings.simplefilter("ignore", FutureWarning)
 
-efile = r"Data_validation_input.xlsx"
+input_file = r"Data_validation_input.xlsx"
 
 #all the input details entered through UI stored in below format
 
-# global_result={
-# 'source_type': 'File', 'target_type': 'SQLSERVER', 'output_type': 'SQLSERVER',
-# 'target_server_name': 'PTDELL0032\\SQLEXPRESS', 'target_username': '', 'target_password': '', 
-# 'output_server_name': 'PTDELL0032\\SQLEXPRESS', 'output_username': '', 'output_password': '', 
-# 'output_database': 'sam', 'output_schema': 'dbo',
-# 'output_table_name': 'validation_results_new', 'output_Number of error records to be displayed': '5'
-# }
 
-#assigning values to variables
+print('\nData Validation Framework \n ')
+
+# Setup connections
+source_connection = connect('source')
+target_connection = connect('target')
+output_connection = connect('output')
+
 source_type = global_result['source_type']
-
 target_type = global_result['target_type']
-
 output_type = global_result['output_type']
 
-output_server_name = global_result.get('output_server_name')
-output_account = global_result.get('output_account')
-output_warehouse = global_result.get('output_warehouse')
-output_username = global_result.get('output_username')
-output_password = global_result.get('output_password')
 output_database = global_result.get('output_database')
 output_schema = global_result.get('output_schema')
 output_table_name = global_result.get('output_table_name')
 max_error_records = global_result.get('output_Number of error records to be displayed')
 
-print()
-print('Data Validation Framework \n ')
-
-try:
-    if source_type == 'SQLSERVER':
-        source_server_name = global_result['source_server_name']
-        source_username = global_result['source_username']
-        source_password = global_result['source_password']
-        source_connection = setup_SQLSERVER_connection(source_server_name, source_username, source_password)
-    elif source_type == 'SNOWFLAKE':
-        source_username = global_result['source_username']
-        source_password = global_result['source_password']
-        source_account = global_result['source_account']
-        source_warehouse = global_result['source_warehouse']
-
-        source_connection = setup_SNOWFLAKE_connection(
-            source_username, source_password, source_account, source_warehouse)
-    else:
-        source_connection = None
-
-except Exception as e:
-    print('Failed to connect source', e)
-
-try:
-    if target_type == 'SQLSERVER':
-        target_server_name = global_result['target_server_name']
-        target_username = global_result['target_username']
-        target_password = global_result['target_password']
-        target_connection = setup_SQLSERVER_connection(target_server_name, target_username, target_password)
-    elif target_type == 'SNOWFLAKE':
-        target_username = global_result['target_username']
-        target_password = global_result['target_password']
-        target_account = global_result['target_account']
-        target_warehouse = global_result['target_warehouse']
-        target_connection = setup_SNOWFLAKE_connection(target_username, target_password, target_account,
-                                                       target_warehouse)
-    else:
-        target_connection = None
-
-except Exception as e:
-    print('\nFailed to connect target', e)
-
-output_connection = None
-
-try:
-    if output_type == 'SQLSERVER':
-        output_server_name = global_result['output_server_name']
-        output_username = global_result['output_username']
-        output_password = global_result['output_password']
-        output_connection = setup_SQLSERVER_connection(
-            output_server_name, output_username, output_password)
-    elif output_type == 'SNOWFLAKE':
-        output_username = global_result['output_username']
-        output_password = global_result['output_password']
-        output_account = global_result['output_account']
-        output_warehouse = global_result['output_warehouse']
-        output_connection = setup_SNOWFLAKE_connection(
-            output_username, output_password, output_account, output_warehouse)
-    else:
-        print('output connection is file\n')
-
-except Exception as e:
-    print('\n Failed to connect output source', e)
-
-
-Datatype_Mapping = pd.read_excel(efile, sheet_name='SQL-Snowflake Datatype Mapping')
+Datatype_Mapping = pd.read_excel(input_file, sheet_name='SQL-Snowflake Datatype Mapping')
 Datatype_Mapping = Datatype_Mapping.applymap(lambda x: x.upper() if isinstance(x, str) else x)
 
-connection_sheet = pd.read_excel(efile, sheet_name='Input')
-input3_info = connection_sheet.values.tolist()
+input_sheet = pd.read_excel(input_file, sheet_name='Input')
 
-for row in input3_info:
+uppercase_columns = ['SourceDB', 'SourceSchema', 'SourceTable', 'SourceColumns',
+                      'TargetDB', 'TargetSchema', 'TargetTable', 'TargetColumns']
 
-    source_file = row[4]
-    target_file = row[8]
+input_sheet[uppercase_columns] = input_sheet[uppercase_columns].applymap(lambda x: x.upper() if isinstance(x, str) else x)
 
-    row = [str(ele).upper() if isinstance(ele, str) else ele for ele in row]
-    source_db, source_schema, source_table_name, source_file_path, source_columns = (row[1], row[2], row[3],
-                                                                                     source_file, row[9])
-    target_db, target_schema, target_table_name, target_file_path, target_columns = (row[5], row[6], row[7],
-                                                                                     target_file, row[10])
+for _,row in input_sheet.iterrows():
+    
+    source_db, source_schema, source_table_name, source_file, source_columns =(row['SourceDB'], row['SourceSchema'],
+                                                                                      row['SourceTable'],row['SourceFilePath'], row['SourceColumns'])
+    target_db, target_schema, target_table_name, target_file, target_columns = (row['TargetDB'], row['TargetSchema'],row['TargetTable'],
+                                                                                     row['TargetFilePath'], row['TargetColumns'])
 
     while True:
 
-        if isinstance(source_file_path, float) and isinstance(target_file_path, float):
+        if isinstance(source_file, float) and isinstance(target_file, float):
             print("Doing operation for: ", source_table_name, ' and ', target_table_name)
-            print()
 
             is_src_table_valid = validate_tables(source_connection, source_db, source_schema, source_table_name)
             is_tgt_table_valid = validate_tables(target_connection, target_db, target_schema, target_table_name)
@@ -143,7 +69,7 @@ for row in input3_info:
                         and validate_columns(target_connection, target_db, target_schema, target_table_name,
                                              target_columns,
                                              None)):
-
+                    
                     source_df = get_table_data(source_connection, source_db, source_schema, source_table_name,
                                             source_columns)
                     target_df = get_table_data(target_connection, target_db, target_schema, target_table_name,
@@ -160,7 +86,7 @@ for row in input3_info:
                     src_key, tgt_key = get_key(source_type, source_connection, source_db, source_table_name,
                                                source_schema, source_columns, target_columns, source_processed)
 
-                    print('Source Primary Key Identified  :  ',src_key)
+                    print('\nSource Primary Key Identified  :  ',src_key)
                     print('\nTarget Primary Key Identified  :  ',tgt_key)
 
                     duplicate_validation_status=duplicate_validation(source_df,target_df,src_key,tgt_key)
@@ -220,7 +146,7 @@ for row in input3_info:
                         target_table_name = input('Enter target table name.').upper()
 
 
-        elif (not isinstance(source_file_path, float)) and isinstance(target_file_path, float):
+        elif (not isinstance(source_file, float)) and isinstance(target_file, float):
 
             print("Doing operation for: ", source_file, ' and ', target_table_name)
 
@@ -293,7 +219,7 @@ for row in input3_info:
                     target_schema = input('Enter target schema.').upper()
                     target_table_name = input('Enter target table name.').upper()
 
-        elif isinstance(source_file_path, float) and (not isinstance(target_file_path, float)):
+        elif isinstance(source_file, float) and (not isinstance(target_file, float)):
             print("Doing operation for: ", source_table_name, ' and ', target_file)
             
             is_src_table_valid=validate_tables(source_connection, source_db, source_schema, source_table_name)
@@ -363,8 +289,8 @@ for row in input3_info:
             
             print("Doing operation for: ", source_file, ' and ', target_file)
             print()
-
             source_df, source_df_columns = handle_file(source_file, "Source")
+            
             if source_df is None:
                 break
 
