@@ -7,11 +7,18 @@ import math
 import sys
 import itertools
 
+def camel_case_with_underscores(col):
+  words=[word.capitalize() for word in col.split('_')]
+  if '_' not in col:
+    return words[0]
+  else:
+    return '_'.join(words)
+      
 class UnsupportedFileTypeError(Exception):
     pass
 def get_file(file_path):
     if file_path.endswith('.csv'):
-        df = pd.read_csv(file_path, delimiter=',', low_memory=False, encoding='cp1252')
+        df = pd.read_csv(file_path, delimiter=',', low_memory=False, encoding='UTF-8')
         df.columns = map(lambda x: str(x).upper(), df.columns)
         df_columns = df.columns
     elif file_path.endswith('.xlsx'):
@@ -20,6 +27,7 @@ def get_file(file_path):
         df_columns = df.columns
     else:
         raise UnsupportedFileTypeError('file type not supported')
+        
     return df, df_columns
 def handle_file(file_path, file_type):
     try:
@@ -105,9 +113,6 @@ def validate_columns(connection, db, schema, table_name, column_names, df_column
 def write_output(connection, server_type, database, schema, table_name, source_table_name, target_table_name,
                  Count_validation_status, Datatype_validation_status, Data_Validation_status, Duplicate_Validation_status):
     
-    camel_case_columns = lambda col: ''.join([word.capitalize() for word in col.split('_')])
-    source_table_name=camel_case_columns(source_table_name)
-    target_table_name=camel_case_columns(target_table_name)
     if Datatype_validation_status:
         dtv = 'Pass' if Datatype_validation_status[0] == '' else 'Fail'
    

@@ -196,8 +196,3 @@ output_var.trace('w', update_output_fields)
 root.state('zoomed')
 
 root.mainloop()
-
-# print(global_result)
-# global_result={'target_type': 'FILE', 'source_type': 'FILE', 'output_type': 'SQLSERVER',
-#   'output_server_name': 'PTDELL0032\\SQLEXPRESS', 'output_username': '', 'output_password': '',
-#  'output_database': 'Sam', 'output_schema': 'dbo', 'output_table_name': 'validation_results_new', 'output_Number of error records to be displayed': '5'}

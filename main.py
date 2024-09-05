@@ -16,7 +16,6 @@ input_file = r"Data_validation_input.xlsx"
 
 #all the input details entered through UI stored in below format
 
-
 print('\nData Validation Framework \n ')
 
 # Setup connections
@@ -74,7 +73,7 @@ for _,row in input_sheet.iterrows():
                                             source_columns)
                     target_df = get_table_data(target_connection, target_db, target_schema, target_table_name,
                                             target_columns)
-
+                   
                     count_validation_status= count_validation(source_df, target_df)
                     
                     datatype_validation_status=datatype_validation(source_connection, target_connection, source_schema, target_schema, source_db,
@@ -97,7 +96,7 @@ for _,row in input_sheet.iterrows():
                     
                     write_output(output_connection, output_type, output_database, output_schema,
                                  output_table_name,
-                                 source_table_name, target_table_name, count_validation_status, datatype_validation_status,
+                                 camel_case_with_underscores(source_table_name), camel_case_with_underscores(target_table_name), count_validation_status, datatype_validation_status,
                                  data_validation_status, duplicate_validation_status)
                     break
 
@@ -189,6 +188,7 @@ for _,row in input_sheet.iterrows():
                     for i in src_key:
                         j = source_columns.index(i)
                         tgt_key.append(target_columns[j])
+
                     tgt_key = ','.join(tgt_key)
                     src_key = ','.join(src_key)
 
@@ -267,7 +267,7 @@ for _,row in input_sheet.iterrows():
                     
                     write_output(output_connection, output_type, output_database, output_schema,
                                  output_table_name,
-                                 source_table_name, target_table_name, count_validation_status, datatype_validation_status,
+                                 source_table_name, camel_case_with_underscores(target_table_name), count_validation_status, datatype_validation_status,
                                  data_validation_status, duplicate_validation_status)
                     
                     break

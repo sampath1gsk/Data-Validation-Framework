@@ -40,17 +40,17 @@ def datatype_validation(source_connection, target_connection, source_schema, tar
                     t1, t2, t3 = int(t[0]), int(t[1]), int(t[2])
                     if s1 > t1 or s2 > t2 or s3 > t3:
                         if source_column_datatypes[source_columns[i]] != target_column_datatypes[target_columns[i]]:
-                            mismatch_source_length_column.append(source_columns[i])
-                            mismatch_target_length_column.append(target_columns[i])
-                            mismatch_source_column.append(source_columns[i])
-                            mismatch_target_column.append(target_columns[i])
+                            mismatch_source_length_column.append(camel_case_with_underscores(source_columns[i]))
+                            mismatch_target_length_column.append(camel_case_with_underscores(target_columns[i]))
+                            mismatch_source_column.append(camel_case_with_underscores(source_columns[i]))
+                            mismatch_target_column.append(camel_case_with_underscores(target_columns[i]))
                         else:
-                            mismatch_source_length_column.append(source_columns[i])
-                            mismatch_target_length_column.append(target_columns[i])
+                            mismatch_source_length_column.append(camel_case_with_underscores(source_columns[i]))
+                            mismatch_target_length_column.append(camel_case_with_underscores(target_columns[i]))
 
                 elif src != tgt:
-                    mismatch_source_column.append(source_columns[i])
-                    mismatch_target_column.append(target_columns[i])
+                    mismatch_source_column.append(camel_case_with_underscores(source_columns[i]))
+                    mismatch_target_column.append(camel_case_with_underscores(target_columns[i]))
 
         elif source_type == target_type == 'SNOWFLAKE':
 
@@ -66,11 +66,11 @@ def datatype_validation(source_connection, target_connection, source_schema, tar
                     t = tgt_dt.split('|')
                     t1, t2, t3 = int(t[0]), int(t[1]), int(t[2])
                     if s1 > t1 or s2 > t2 or s3 > t3:
-                        mismatch_source_length_column.append(source_columns[i])
-                        mismatch_target_length_column.append(target_columns[i])
+                        mismatch_source_length_column.append(camel_case_with_underscores(source_columns[i]))
+                        mismatch_target_length_column.append(camel_case_with_underscores(target_columns[i]))
                 elif src != tgt:
-                    mismatch_source_column.append(source_columns[i])
-                    mismatch_target_column.append(target_columns[i])
+                    mismatch_source_column.append(camel_case_with_underscores(source_columns[i]))
+                    mismatch_target_column.append(camel_case_with_underscores(target_columns[i]))
                 else:
                     pass
 
@@ -90,11 +90,11 @@ def datatype_validation(source_connection, target_connection, source_schema, tar
                     t = tgt_dt.split('|')
                     t1, t2, t3 = int(t[0]), int(t[1]), int(t[2])
                     if s1 > t1 or s2 > t2 or s3 > t3:
-                        mismatch_source_length_column.append(source_columns[i])
-                        mismatch_target_length_column.append(target_columns[i])
+                        mismatch_source_length_column.append(camel_case_with_underscores(source_columns[i]))
+                        mismatch_target_length_column.append(camel_case_with_underscores(target_columns[i]))
                 elif src != tgt:
-                    mismatch_source_column.append(source_columns[i])
-                    mismatch_target_column.append(target_columns[i])
+                    mismatch_source_column.append(camel_case_with_underscores(source_columns[i]))
+                    mismatch_target_column.append(camel_case_with_underscores(target_columns[i]))
                 else:
                     pass
 
@@ -114,11 +114,11 @@ def datatype_validation(source_connection, target_connection, source_schema, tar
                     t = tgt_dt.split('|')
                     t1, t2, t3 = int(t[0]), int(t[1]), int(t[2])
                     if s1 > t1 or s2 > t2 or s3 > t3:
-                        mismatch_source_length_column.append(source_columns[i])
-                        mismatch_target_length_column.append(target_columns[i])
+                        mismatch_source_length_column.append(camel_case_with_underscores(source_columns[i]))
+                        mismatch_target_length_column.append(camel_case_with_underscores(target_columns[i]))
                 elif src != tgt:
-                    mismatch_source_column.append(source_columns[i])
-                    mismatch_target_column.append(target_columns[i])
+                    mismatch_source_column.append(camel_case_with_underscores(source_columns[i]))
+                    mismatch_target_column.append(camel_case_with_underscores(target_columns[i]))
                 else:
                     pass
 

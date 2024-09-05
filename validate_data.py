@@ -1,4 +1,6 @@
 from help_functions import *
+import pandas as pd
+import numpy as np
 
 def data_validation( source_df,source_columns, target_df,target_columns,src_key,tgt_key,max_error_records):
 
@@ -6,6 +8,8 @@ def data_validation( source_df,source_columns, target_df,target_columns,src_key,
     
     src_cleaned = source_df
     tgt_cleaned = target_df
+
+
 
     empty_rows_in_source = len(source_df) - len(source_df.dropna(how='all'))
     empty_rows_in_target = len(target_df) - len(target_df.dropna(how='all'))
@@ -15,30 +19,29 @@ def data_validation( source_df,source_columns, target_df,target_columns,src_key,
 
     if empty_rows_in_source > empty_rows_in_target:
         data_validation.append(f'{empty_rows_in_source - empty_rows_in_target} missing empty records in target')
-    
-    
+
     src_key = src_key.split(',')
     tgt_key = tgt_key.split(',')
-
-    camel_case_columns = lambda col: ''.join([word.capitalize() for word in col.split('_')])
-
+    
     boolean_like_values = {'1', '0', 'true', 'false', 'True', 'False', 1, 0, True, False}
     columns_to_bool = []
     columns_to_numeric = []
     columns_to_date = []
     tgt_null_column=[]
-
+   
     for i in range(len(source_columns)):
+
         if source_columns[i] not in src_key:
             unique_vals_df1 = source_df[source_columns[i]].dropna().unique()
             unique_vals_df2 = target_df[target_columns[i]].dropna().unique()
+
             if len(unique_vals_df1)!=0 and  len(unique_vals_df2)==0:
-                tgt_null_column.append(f'"{camel_case_columns(target_columns[i])}"')
+                tgt_null_column.append(f'"{camel_case_with_underscores(target_columns[i])}"')
 
             if set(unique_vals_df1).issubset(boolean_like_values) or set(unique_vals_df2).issubset(
                     boolean_like_values):
-
                 columns_to_bool.append(i)
+
             else:
                 if is_numeric(unique_vals_df1) and is_numeric(unique_vals_df2):
                     columns_to_numeric.append(i)
@@ -53,6 +56,8 @@ def data_validation( source_df,source_columns, target_df,target_columns,src_key,
 
         col_df1 = source_df[source_columns[i]]
         col_df2 = target_df[target_columns[i]]
+        col_df1 = col_df1.where(col_df1.notnull(), np.nan)
+        col_df2 = col_df2.where(col_df2.notnull(), np.nan)
 
         if i in columns_to_bool:
             col_df1 = normalize_boolean_column(col_df1)
@@ -100,15 +105,15 @@ def data_validation( source_df,source_columns, target_df,target_columns,src_key,
                 else:
                     col_df1 = common_records[source_columns[i]]
                     col_df2 = common_records[target_columns[i]]
-
                 mismatches = (col_df1 != col_df2).sum()
-                mismatch_counts[f'"{camel_case_columns(source_columns[i])}"'] = mismatches.sum()
+                mismatch_counts[f'"{camel_case_with_underscores(source_columns[i])}"'] = mismatches.sum()
                 if mismatches > 0:
                     mismatch_rows = col_df1[col_df1 != col_df2].index
                     primary_keys = merge_data.loc[mismatch_rows][src_key]
                     primary_keys_dict[source_columns[i]] = primary_keys.values.tolist()
 
         data_dict = {}
+
         for column, primary_keys_list in primary_keys_dict.items():
 
             for primary_keys in primary_keys_list:
@@ -149,18 +154,18 @@ def data_validation( source_df,source_columns, target_df,target_columns,src_key,
                 for i in range(max_error_records):
                     s = ''
                     for (a, b) in zip(src_key, data_dict[col][i][0]):
-                        s += f' "{camel_case_columns(str(a))}" = {b} ,'
+                        s += f' "{camel_case_with_underscores(str(a))}" = {b} ,'
                     s = s.rstrip(',')
 
-                    data_validation.append(f'Mismatched data: Source_"{camel_case_columns(col)}"= {data_dict[col][i][1][0] if data_dict[col][i][1][0] !="none" else "null"},  Target_"{camel_case_columns(col2)}"= {data_dict[col][i][2][0] if data_dict[col][i][2][0] != "none" else "null"} for Key columns {s}')
+                    data_validation.append(f'Mismatched data: Source_"{camel_case_with_underscores(col)}"= {data_dict[col][i][1][0] if data_dict[col][i][1][0] !="nan" else "null"},  Target_"{camel_case_with_underscores(col2)}"= {data_dict[col][i][2][0] if data_dict[col][i][2][0] != "nan" else "null"} for Key columns {s}')
 
             else:
                 for i in data_dict[col]:
                     s = ''
                     for (a, b) in zip(src_key, i[0]):
-                        s += f' "{camel_case_columns(str(a))}" = {b} ,'
+                        s += f' "{camel_case_with_underscores(str(a))}" = {b} ,'
                     s = s.rstrip(',')
-                    data_validation.append(f'Mismatched Data: Source_"{camel_case_columns(col)}"= {i[1][0] if i[1][0] !="none" else "null"}, Target_"{camel_case_columns(col2)}"= {i[2][0] if i[2][0]!= "none" else "null"} for key columns {s}')
+                    data_validation.append(f'Mismatched Data: Source_"{camel_case_with_underscores(col)}"= {i[1][0] if i[1][0] !="nan" else "null"}, Target_"{camel_case_with_underscores(col2)}"= {i[2][0] if i[2][0]!= "nan" else "null"} for key columns {s}')
 
        
         if len(data_validation) > 1:
